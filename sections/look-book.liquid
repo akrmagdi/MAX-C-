@@ -1,0 +1,473 @@
+{% schema %}
+{
+  "name": "Lookbook Collection Grid",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Lookbook Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Default"
+    }
+  ]
+}
+{% endschema %}
+
+<!-- Main Section Wrapper -->
+<div class="lookbook-{{ section.id }}">
+  <!-- Grid Container for Cards -->
+  <div class="lookbook-container-{{ section.id }}">
+    {% for block in section.blocks %}
+      {% if block.settings.collection != blank %}
+        {% assign collection = block.settings.collection | global_collections %}
+
+        <!-- Individual Card -->
+        <div class="lookbook-card-{{ section.id }}" onclick="openOverlay('{{ block.id }}')">
+          <img src="{{ collection.image | img_url: '600x800' }}" alt="{{ collection.title }}" class="lookbook-image">
+          <div class="lookbook-title">{{ collection.title }}</div>
+          <!-- Card Number Indicator -->
+          <div class="card-number-indicator">{{ forloop.index | prepend: "0" }}/{{ section.blocks.size | prepend: "0" }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Overlay Section (Initially Hidden) -->
+  {% for block in section.blocks %}
+    {% if block.settings.collection != blank %}
+      {% assign collection = block.settings.collection | global_collections %}
+
+      <div
+        id="overlay-{{ block.id }}"
+        class="lookbook-overlay"
+        data-collection-image="{{ collection.image | img_url: '600x800' }}"
+        data-images="{% for product in collection.products %}{{ product.featured_image | img_url: '600x800' }}{% unless forloop.last %},{% endunless %}{% endfor %}"
+      >
+        <div class="overlay-content">
+          <!-- Left Side: Collection Image with Arrows -->
+          <div
+            class="overlay-left"
+            style="background-color: #171717; position: relative; overflow: hidden; padding: 0;"
+          >
+            <div class="image-container" style="width: 100%; height: 100%; position: relative;">
+              <button class="arrow left-arrow" onclick="navigateCollection('{{ block.id }}', -1)">&#10094;</button>
+              <img
+                id="collection-image-{{ block.id }}"
+                src="{{ collection.image | img_url: '600x800' }}"
+                alt="{{ collection.title }}"
+                class="collection-image"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
+              >
+              <button class="arrow right-arrow" onclick="navigateCollection('{{ block.id }}', 1)">&#10095;</button>
+            </div>
+            <!-- Card Number Indicator in Overlay for Desktop -->
+            <div class="card-number-indicator">{{ forloop.index | prepend: "0" }}/{{ section.blocks.size | prepend: "0" }}</div>
+          </div>
+
+          <!-- Right Side: Product Grid -->
+          <div class="overlay-right">
+            <div class="product-grid" id="product-grid-{{ block.id }}">
+              {% for product in collection.products %}
+                {% render 'product-card', product: product %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <button
+          class="close-overlay"
+          onclick="closeOverlay('{{ block.id }}')"
+          style="background-color: #171717; color: white;"
+        >
+          ✕
+        </button>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<!-- CSS -->
+<style>
+  /* Grid Layout for Lookbook Container */
+  .lookbook-container-{{ section.id }} {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 20px;
+  }
+
+  /* Lookbook Card Styles */
+  .lookbook-card-{{ section.id }} {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    text-align: center;
+  }
+  .lookbook-image {
+    width: 100%;
+    transition: filter 0.3s ease;
+  }
+  .lookbook-card-{{ section.id }}:hover .lookbook-image {
+    filter: blur(3px);
+  }
+  .lookbook-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .lookbook-card-{{ section.id }}:hover .lookbook-title {
+    opacity: 1;
+  }
+
+  /* Card Number Indicator */
+  .card-number-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: black;
+    font-size: 1em;
+    font-weight: bold;
+  }
+
+  /* Overlay Styles */
+  .lookbook-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+  }
+  .overlay-content {
+    display: flex;
+    height: 100%;
+  }
+  .overlay-left,
+  .overlay-right {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Collection Image with Arrows */
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .collection-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Mobile: Single Column Swipable Cards */
+  @media (max-width: 768px) {
+    .lookbook-container-{{ section.id }} {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+    }
+    .lookbook-card-{{ section.id }} {
+      scroll-snap-align: center;
+      width: 100vw;
+      overflow: hidden;
+      text-align: center;
+    }
+    /* Card Number Indicator for Mobile */
+    .card-number-indicator {
+      bottom: 5px;
+      left: 5px;
+      font-size: 1em;
+      color: black;
+    }
+  }
+</style>
+
+<!-- JavaScript -->
+<script>
+  function openOverlay(id) {
+    const overlay = document.getElementById(`overlay-${id}`);
+    overlay.style.display = 'block';
+
+    const collectionImage = overlay.getAttribute('data-collection-image');
+    document.getElementById(`collection-image-${id}`).src = collectionImage;
+
+    updateCardNumber(id);
+  }
+
+  function closeOverlay(id) {
+    document.getElementById(`overlay-${id}`).style.display = 'none';
+  }
+
+  function navigateCollection(id, direction) {
+    const overlays = document.querySelectorAll('.lookbook-overlay');
+    const overlaysArray = Array.from(overlays);
+    const currentIndex = overlaysArray.findIndex(overlay => overlay.id === `overlay-${id}`);
+
+    let newIndex = (currentIndex + direction + overlaysArray.length) % overlaysArray.length;
+    const newOverlay = overlaysArray[newIndex];
+    const newId = newOverlay.id.replace('overlay-', '');
+
+    closeOverlay(id);
+    openOverlay(newId);
+
+    const newCollectionImage = newOverlay.getAttribute('data-collection-image');
+    const collectionImageElement = document.getElementById(`collection-image-${newId}`);
+
+    collectionImageElement.classList.remove('slide-left', 'slide-right');
+    if (direction === 1) {
+      collectionImageElement.classList.add('slide-left');
+    } else {
+      collectionImageElement.classList.add('slide-right');
+    }
+
+    setTimeout(() => {
+      collectionImageElement.src = newCollectionImage;
+    }, 10);
+
+    document.querySelectorAll(`#product-grid-${id}`).forEach(grid => grid.style.display = 'none');
+    document.getElementById(`product-grid-${newId}`).style.display = 'grid';
+  }
+
+  function updateCardNumber(id) {
+    const totalCards = document.querySelectorAll('.lookbook-card-{{ section.id }}').length;
+    const currentIndex = Array.from(document.querySelectorAll('.lookbook-card-{{ section.id }}')).findIndex(card => card.id === id) + 1;
+
+    document.querySelector('.card-number-indicator').textContent = `${String(currentIndex).padStart(2, '0')}/${String(totalCards).padStart(2, '0')}`;
+  }
+</script>
+<style>
+        /* Grid Layout for Lookbook Container */
+        .lookbook-container-{{ section.id }} {
+          display: grid;
+          grid-template-columns: auto auto auto auto;
+          gap: 20px;
+        }
+
+        /* Lookbook Card Styles */
+        .lookbook-card-{{ section.id }} {
+          position: relative;
+          cursor: pointer;
+          overflow: hidden;
+          text-align: center;
+        }
+        .lookbook-image {
+          width: 100%;
+          transition: filter 0.3s ease;
+        }
+        .lookbook-card-{{ section.id }}:hover .lookbook-image {
+          filter: blur(3px); /* Reduced blur */
+        }
+        .lookbook-title {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 1.5em;
+          font-weight: bold;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .lookbook-card-{{ section.id }}:hover .lookbook-title {
+          opacity: 1; /* Show title on hover */
+        }
+
+        /* Overlay Styles */
+        .lookbook-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          z-index: 1000;
+        }
+        .overlay-content {
+          display: flex;
+          height: 100%;
+        }
+        .overlay-left,
+        .overlay-right {
+          width: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Collection Image with Arrows */
+        .image-container {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        .collection-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .collection-image.slide-left {
+          animation: slideLeft 0.5s forwards;
+        }
+        .collection-image.slide-right {
+          animation: slideRight 0.5s forwards;
+        }
+
+        /* Slide Animations */
+        @keyframes slideLeft {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        @keyframes slideRight {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
+        }
+
+        .arrow {
+          position: absolute;
+          font-size: 2em;
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          transition: opacity 0.2s ease;
+          z-index: 10;
+        }
+        .left-arrow {
+          left: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        .right-arrow {
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        .arrow:hover {
+          opacity: 0.7;
+        }
+
+        /* Product Grid */
+    .product-grid {
+      display: grid;
+      gap: 10px;
+      background: white;
+    }
+        .close-overlay {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 2em;
+          color: white;
+          border: none;
+          cursor: pointer;
+        }
+        .lookbook-overlay {
+        background: white; /* Solid background color */
+      }
+      .overlay-right {
+        background: white;
+        padding: 6rem;
+      }
+      .image-container {
+        background: #f6f6f6;
+      }
+      .close-overlay {
+        background: transparent !important;
+        color: black !important;
+      }
+      .lookbook-title {
+        color: white;
+        font-family: inherit;
+      }
+      .arrow {
+        color: black;
+      }
+  @media (min-width: 768px) {
+    .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+            /* Mobile Overlay Adjustments */
+        /* Mobile Overlay Adjustments */
+        @media (max-width: 768px) {
+            /* Stack content vertically in overlay */
+            .overlay-content {
+                flex-direction: column;
+                height: 100%;
+            }
+            /* Image Section on Top */
+            .overlay-left {
+                width: 100%;
+                height: 60%; /* Image takes up 60% of screen height */
+            }
+            /* Product Carousel Section at Bottom */
+            .overlay-right {
+                width: 100%;
+                height: 40%;
+                overflow: hidden;
+                padding: 1rem;
+                background: #f6f6f6;
+            }
+            /* Product Grid as Single Row Carousel */
+      .product-grid {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 150px; /* Adjust width as needed */
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        gap: 10px;
+        width: 100%;
+      }
+
+            /* Product Card as Carousel Item */
+            .product-card {
+                scroll-snap-align: center; /* Center each item in view when scrolled */
+                background: white;
+                border: 1px solid #ddd;
+                padding: 10px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            /* Close Button Position */
+            .close-overlay {
+                top: 15px;
+                right: 15px;
+                font-size: 1.5em;
+                color: black;
+            }
+        }
+  @media (min-width: 992px) {
+  .lookbook-card-{{ section.id }} .card-number-indicator {
+    /* Desktop-specific styles */
+    display: none;
+  }
+}
+</style>

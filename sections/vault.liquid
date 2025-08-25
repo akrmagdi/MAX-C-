@@ -1,0 +1,158 @@
+<section style="height: 100vh; 
+  background-image: url('{{ section.settings.background_image | img_url: 'master' }}'); 
+  background-size: cover; 
+  background-position: center; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: flex-end; 
+  align-items: center; 
+  color: white; 
+  text-align: center; 
+  padding-bottom: 3rem;">
+    <!-- Title -->
+    <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem;">{{ section.settings.main_title }}</h1>
+
+    <!-- Countdown -->
+    <div id="countdown" style="font-size: 1.5rem; margin-bottom: 2rem;"></div>
+
+    <!-- Subtitle -->
+    <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">{{ section.settings.subtitle }}</h2>
+
+    <!-- Email Input -->
+    <div style="margin-bottom: 1.5rem;">
+        <div class="klaviyo-form-Tu3YcS"></div>
+    </div>
+
+    <!-- Enter with Passcode -->
+    <div class="password-box" role="button" aria-controls="storefront-password-drawer" id="open-password-drawer">
+        <p class="password-box__text"></p>
+        <span class="hidden sm:block text-sm">Enter Password</span>
+        {%- render 'icon' with 'lock', width: 12 -%}
+    </div>
+
+    {%- capture storefront_password_form -%}
+        {%- form 'storefront_password', class: 'form' -%}
+            <p class="text-center">Enter the store password to gain access.</p>
+
+            {%- if form.errors -%}
+                {%- assign has_errors = true -%}
+                {%- render 'banner', status: 'error', content: form.errors.messages['form'], text_alignment: 'center' -%}
+            {%- endif -%}
+
+            {%- assign password_label = 'Password' -%}
+            {%- assign submit_label = 'Enter Store' -%}
+
+            {%- render 'input', type: 'password', name: 'password', label: password_label, required: true -%}
+            {%- render 'button', type: 'submit', content: submit_label, stretch: true -%}
+        {%- endform -%}
+    {%- endcapture -%}
+
+<x-drawer id="storefront-password-drawer" class="drawer drawer--center-body color-scheme color-scheme--dialog">
+    <p class="h4" slot="header">Enter Access Password</p>
+    <form id="access-form" class="form">
+        <input type="password" id="user-password" placeholder="Enter Password" required>
+        <button type="submit">Submit</button>
+        <p id="error-message" style="color: red; display: none;">Incorrect password. Please try again.</p>
+    </form>
+</x-drawer>
+</section>
+<style>
+  #countdown {
+  margin: 0;
+}
+</style>
+<script>
+    function initializeCountdown(endTime) {
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                clearInterval(interval);
+                document.getElementById('countdown').innerHTML = 'EXPIRED';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = `${days}D : ${hours}H : ${minutes}M : ${seconds}S`;
+        }
+
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const countdownEndDate = new Date("{{ section.settings.countdown_date }}").getTime();
+        initializeCountdown(countdownEndDate);
+    });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const accessForm = document.getElementById('access-form');
+    const userPasswordInput = document.getElementById('user-password');
+    const errorMessage = document.getElementById('error-message');
+    const correctPassword = '{{ section.settings.access_password | escape }}';
+    const redirectUrl = '{{ section.settings.redirect_url }}';
+
+    accessForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const userPassword = userPasswordInput.value;
+        if (userPassword === correctPassword) {
+            window.location.href = redirectUrl;
+        } else {
+            errorMessage.style.display = 'block';
+        }
+    });
+});
+</script>
+
+{% schema %}
+{
+    "name": "Locked Page",
+    "settings": [
+        {
+            "type": "text",
+            "id": "main_title",
+            "label": "Main Title",
+            "default": "END OF SEASON SALE"
+        },
+        {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Subtitle",
+            "default": "GET EARLY ACCESS"
+        },
+        {
+            "type": "text",
+            "id": "countdown_date",
+            "label": "Countdown Date (YYYY-MM-DD HH:MM:SS)",
+            "default": "2025-12-31 23:59:59"
+        },
+        {
+            "type": "image_picker",
+            "id": "background_image",
+            "label": "Background Image"
+        },
+        {
+            "type": "text",
+            "id": "access_password",
+            "label": "Access Password",
+            "default": "yourpassword"
+        },
+        {
+            "type": "url",
+            "id": "redirect_url",
+            "label": "Redirect URL",
+            "default": "/collections/all"
+        }
+    ],
+    "presets": [
+        {
+            "name": "Vault/Archive Page"
+        }
+    ]
+}
+{% endschema %}

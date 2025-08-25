@@ -1,0 +1,306 @@
+{% schema %}
+{
+  "name": "Image Pickers ",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Select an Option"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title Font Size (rem)",
+      "default": 2,
+      "min": 1,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "type": "range",
+      "id": "picker_font_size",
+      "label": "Picker Font Size (rem)",
+      "default": 1,
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1
+    },
+    {
+      "type": "color",
+      "id": "Content_Background_color",
+      "label": "Content Background Color",
+      "default": "#f2f2f2"
+    },
+    {
+      "type": "color",
+      "id": "picker_font_color",
+      "label": "Picker Font Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "picker_font_color_hover",
+      "label": "Picker Font Color Hover",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "picker_stroke_color",
+      "label": "Picker Stroke Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding (rem)",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 0.1
+    },
+    {
+      "type": "range",
+      "id": "margin",
+      "label": "Margin (vw)",
+      "default": 2,
+      "min": 0,
+      "max": 10,
+      "step": 0.1
+    },
+    {
+      "type": "image_picker",
+      "id": "picker_image_1",
+      "label": "Title Picker 1 Image"
+    },
+    {
+      "type": "text",
+      "id": "picker_title_1",
+      "label": "Title Picker 1",
+      "default": "Picker Title 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "picker_image_2",
+      "label": "Title Picker 2 Image"
+    },
+    {
+      "type": "text",
+      "id": "picker_title_2",
+      "label": "Title Picker 2",
+      "default": "Picker Title 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "picker_image_3",
+      "label": "Title Picker 3 Image"
+    },
+    {
+      "type": "text",
+      "id": "picker_title_3",
+      "label": "Title Picker 3",
+      "default": "Picker Title 3"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Pickers",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+.image-title-pickers-container {
+  display: flex;
+  flex-direction: row;
+  height: 50vw; /* Adjusted height */
+  border-radius: 24px;
+  margin: {{ section.settings.margin }}vw;
+  padding: {{ section.settings.padding }}rem;
+  flex-wrap: wrap;
+}
+
+.image-stack-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 24px 0 0 24px;
+}
+
+.stacked-image {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.5s ease; /* Smooth transition */
+  object-fit: cover;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: {{ section.settings.Content_Background_color}};
+  border-radius: 0 24px 24px 0;
+}
+
+.title-pickers {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.8rem; /* Added margin for spacing */
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 0.8rem;
+  color: {{ section.settings.title_color }};
+  font-size: {{ section.settings.title_font_size }}rem;
+}
+
+.title-picker {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  text-align: center;
+  position: relative;
+  font-size: {{ section.settings.picker_font_size }}rem;
+  color: {{ section.settings.picker_font_color }};
+  transition: color 0.3s ease, background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.title-picker p {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  transition: none; /* Remove potential glitch */
+}
+
+.title-picker p::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 10%;
+  background-color: {{ section.settings.picker_stroke_color }};
+  top: 45%;
+  left: 0;
+  z-index: 1;
+  transition: width 0.5s ease; /* Made the transition smoother */
+}
+
+.title-picker.active p::before {
+  width: 100%;
+}
+
+.title-picker:hover {
+  color: {{ section.settings.picker_font_color_hover }};
+  background-color: #f0f0f0;
+}
+
+@media (max-width: 1024px) {
+  .image-title-pickers-container {
+    flex-direction: column;
+    height: 760px; /* Adjust height for mobile */
+  }
+
+  .image-stack-container,
+  .content-container {
+    height: 50%;
+    border-radius: 24px;
+  }
+
+  .image-stack-container {
+    border-radius: 24px 24px 0 0;
+  }
+
+  .content-container {
+    border-radius: 0 0 24px 24px;
+  }
+}
+</style>
+
+<div class="image-title-pickers-container">
+  <div class="image-stack-container">
+    <img alt="Image 1" class="stacked-image hs-lazyload hs-id-1c3dfbca" id="image1" loading="lazy" src="{{ section.settings.picker_image_1 | img_url: 'master' }}"/>
+    <img alt="Image 2" class="stacked-image hs-lazyload hs-id-cf1bee60" id="image2" loading="lazy" src="{{ section.settings.picker_image_2 | img_url: 'master' }}"/>
+    <img alt="Image 3" class="stacked-image hs-lazyload hs-id-90a62535" id="image3" loading="lazy" src="{{ section.settings.picker_image_3 | img_url: 'master' }}"/>
+  </div>
+  <div class="content-container">
+    <h2 class="section-title">{{ section.settings.section_title }}</h2>
+    <div class="title-pickers">
+      <div class="title-picker" data-index="1" onclick="changeImage(this, 1)">
+        <p>{{ section.settings.picker_title_1 }}</p>
+      </div>
+      <div class="title-picker" data-index="2" onclick="changeImage(this, 2)">
+        <p>{{ section.settings.picker_title_2 }}</p>
+      </div>
+      <div class="title-picker" data-index="3" onclick="changeImage(this, 3)">
+        <p>{{ section.settings.picker_title_3 }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentIndex = 1;
+let isTransitioning = false;
+
+// Function to handle image change with smooth transition
+function changeImage(pickerElement, newIndex) {
+  if (isTransitioning || currentIndex === newIndex) return;
+  isTransitioning = true;
+
+  const currentImage = document.getElementById(`image${currentIndex}`);
+  const nextImage = document.getElementById(`image${newIndex}`);
+  const pickers = document.querySelectorAll('.title-picker');
+
+  // Remove active class from all pickers
+  pickers.forEach(picker => picker.classList.remove('active'));
+
+  // Add active class to the clicked picker
+  pickerElement.classList.add('active');
+
+  // Slide images vertically based on the index
+  nextImage.style.transform = `translateY(${newIndex > currentIndex ? 100 : -100}%)`;
+  nextImage.style.zIndex = 2;
+  currentImage.style.zIndex = 1;
+
+  // Trigger the transition
+  requestAnimationFrame(() => {
+    nextImage.style.transform = 'translateY(0)';
+    currentImage.style.transform = `translateY(${newIndex > currentIndex ? -100 : 100}%)`;
+  });
+
+  // Ensure transition completes before allowing another
+  currentImage.addEventListener('transitionend', () => {
+    isTransitioning = false;
+    currentIndex = newIndex;
+  }, { once: true });
+}
+
+// Automatically select the first picker on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const firstPicker = document.querySelector('.title-picker[data-index="1"]');
+  if (firstPicker) {
+    firstPicker.click();
+  }
+
+  // Add hover event to pickers
+  const pickers = document.querySelectorAll('.title-picker');
+  pickers.forEach(picker => {
+    picker.addEventListener('mouseover', () => {
+      picker.click();
+    });
+  });
+});
+</script>

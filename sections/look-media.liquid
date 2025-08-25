@@ -1,0 +1,118 @@
+{% comment %}
+Media Look Section
+{% endcomment %}
+
+<section id="{{ section.id }}" style="padding: {{ section.settings.padding }}em;">
+  <div class="media-look-container">
+    <div class="media-look-grid">
+      {% for block in section.blocks %}
+        <div class="media-look-item {% if section.settings.aspect_ratio == 'tall' %}aspect-tall{% elsif section.settings.aspect_ratio == 'square' %}aspect-square{% else %}aspect-adapt{% endif %}">
+          <img src="{{ block.settings.image | img_url: 'master' }}" class="media-look-image">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Adjust grid layout for desktop and mobile based on schema settings */
+  #{{ section.id }} .media-look-grid {
+    display: grid;
+    gap: 1em;
+    grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    #{{ section.id }} .media-look-grid {
+      grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+    }
+  }
+
+  /* Aspect Ratio Wrappers */
+  .media-look-item {
+    position: relative;
+    overflow: hidden;
+  }
+  .media-look-item.aspect-tall {
+    padding-top: 133.33%; /* 3:4 aspect ratio */
+  }
+  .media-look-item.aspect-square {
+    padding-top: 100%; /* 1:1 aspect ratio */
+  }
+  .media-look-item.aspect-adapt {
+    padding-top: 75%; /* Default ratio, can adjust as needed */
+  }
+
+  /* Image Styling */
+  .media-look-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Media Look Section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Container Padding (em)",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 1.5
+    },
+    {
+      "type": "number",
+      "id": "columns_desktop",
+      "label": "Number of Columns (Desktop)",
+      "default": 4
+    },
+    {
+      "type": "number",
+      "id": "columns_mobile",
+      "label": "Number of Columns (Mobile)",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt" },
+        { "value": "tall", "label": "Tall (3:4)" },
+        { "value": "square", "label": "Square (1:1)" }
+      ],
+      "default": "adapt"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Look Media",
+      "category": "Custom",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,490 @@
+{% schema %}
+{
+  "name": "vault",
+  "class": "shopify-section--countdown",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "separate_section_with_border",
+      "label": "Separate Section with Border",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Recommendation for the image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile Image",
+      "info": "Recommendation for the mobile image"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image Size",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Original Image Ratio"
+        },
+        {
+          "value": "xs",
+          "label": "X Small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "Special Offer"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content",
+      "default": "<p>Share something about your limited offer or promotion.</p>"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text"
+    },
+    {
+      "type": "text",
+      "id": "expiration_date",
+      "label": "Expiration Date",
+      "placeholder": "Eg. 2025-12-25 12:00",
+      "info": "Provide the expiration date and time."
+    },
+    {
+      "type": "select",
+      "id": "expiration_behavior",
+      "label": "Expiration Behavior",
+      "options": [
+        {
+          "value": "hide",
+          "label": "Hide after expiration"
+        },
+        {
+          "value": "leave",
+          "label": "Leave visible after expiration"
+        }
+      ],
+      "default": "leave"
+    },
+    {
+      "type": "select",
+      "id": "timer_position",
+      "label": "Timer Position",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "end",
+          "label": "Right"
+        }
+      ],
+      "default": "end"
+    },
+    {
+      "type": "checkbox",
+      "id": "animate_number",
+      "label": "Animate Numbers",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "flip_background",
+      "label": "Flip Background"
+    },
+    {
+      "type": "range",
+      "id": "flip_background_opacity",
+      "min": 0,
+      "max": 100,
+      "unit": "%",
+      "label": "Flip Background Opacity",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "flip_text_color",
+      "label": "Flip Text Color"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay Opacity",
+      "min": 0,
+      "max": 100,
+      "unit": "%",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "vault/archive -v2"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Click Here"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        }
+      ],
+      "limit": 2
+    },
+{
+  "type": "toggle_button",
+  "name": "Toggle Button",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "More Info"
+    },
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "Custom Liquid",
+      "info": "Add any custom Liquid code you want to render when the button is clicked."
+    }
+  ],
+  "limit": 2
+}
+  ]
+} 
+{% endschema %}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.image -%}
+      --content-over-media-content-max-width: 71.875rem;
+      --content-over-media-row-gap: var(--section-vertical-spacing);
+      --content-over-media-overlay: {{ section.settings.overlay_color.rgb }} / {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    {%- endif -%}
+
+    --countdown-timer-flip-background: {{ section.settings.flip_background.rgb }} / {{ section.settings.flip_background_opacity | divided_by: 100.0 }};
+    --countdown-timer-flip-text-color: {{ section.settings.flip_text_color.rgb }};
+  }
+</style>
+
+{%- assign color_scheme_hash = section.settings.color_scheme.settings.background_gradient | default: section.settings.color_scheme.settings.background | md5 -%}
+
+<div class="color-scheme color-scheme--{{ section.settings.color_scheme.id }} color-scheme--bg-{{ color_scheme_hash }} {% if section.settings.image != blank %}color-scheme--with-image-overlay{% else %}section-spacing {% if section.settings.separate_section_with_border %}bordered-section{% endif %}{% endif %}">
+  {%- capture section_content -%}
+    <div class="countdown {% if section.settings.timer_position == 'start' %}countdown--reverse{% endif %}">
+      <div class="countdown__content prose">
+        {%- if section.settings.subheading != blank -%}
+          <p class="h6">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.title != blank -%}
+          <h2 class="h1">{{ section.settings.title }}</h2>
+        {%- endif -%}
+
+        {{- section.settings.content -}}
+      </div>
+
+      {%- assign accessibility_expiration_date = section.settings.expiration_date | date: format: 'date_at_time' -%}
+      {%- assign accessibility_text = 'sections.countdown_timer.expires_accessibility_text' | t: expiration_date: accessibility_expiration_date -%}
+
+      {%- if section.settings.flip_background != blank and section.settings.flip_background != 'rgba(0,0,0,0)' -%}
+        {%- assign has_flip_background = true -%}
+      {%- endif -%}
+
+      <countdown-timer class="countdown__timer" role="timer" aria-label="{{ accessibility_text | escape }}" expires-at="{{ section.settings.expiration_date | date: '%FT%T%:z' | escape }}" expiration-behavior="{{ section.settings.expiration_behavior }}">
+        <div class="countdown__timer-item" aria-hidden="true">
+          <countdown-timer-flip type="days" {% if section.settings.animate_number %}animate{% endif %} class="countdown__timer-flip {% if has_flip_background %}countdown__timer-flip--background{% endif %} h1">00</countdown-timer-flip>
+          <span class="countdown__timer-unit h6">Days</span>
+        </div>
+
+        <span class="countdown__timer-item-separator" aria-hidden="true">:</span>
+
+        <div class="countdown__timer-item" aria-hidden="true">
+          <countdown-timer-flip type="hours" {% if section.settings.animate_number %}animate{% endif %} class="countdown__timer-flip {% if has_flip_background %}countdown__timer-flip--background{% endif %} h1">00</countdown-timer-flip>
+          <span class="countdown__timer-unit h6">Hours</span>
+        </div>
+
+        <span class="countdown__timer-item-separator" aria-hidden="true">:</span>
+
+        <div class="countdown__timer-item" aria-hidden="true">
+          <countdown-timer-flip type="minutes" {% if section.settings.animate_number %}animate{% endif %} class="countdown__timer-flip {% if has_flip_background %}countdown__timer-flip--background{% endif %} h1">00</countdown-timer-flip>
+          <span class="countdown__timer-unit h6">Minutes</span>
+        </div>
+
+        <span class="countdown__timer-item-separator" aria-hidden="true">:</span>
+
+        <div class="countdown__timer-item" aria-hidden="true">
+          <countdown-timer-flip type="seconds" {% if section.settings.animate_number %}animate{% endif %} class="countdown__timer-flip {% if has_flip_background %}countdown__timer-flip--background{% endif %} h1">00</countdown-timer-flip>
+          <span class="countdown__timer-unit h6">Seconds</span>
+        </div>
+      </countdown-timer>
+
+ <div class="countdown__buttons">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'button' -%}
+        <a href="{{ block.settings.button_link }}" class="countdown__button">{{ block.settings.button_text }}</a>
+      {%- elsif block.type == 'toggle_button' -%}
+        <button class="countdown__toggle-button">{{ block.settings.button_text }}</button>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<div class="countdown__info hidden">
+  <div class="info__content">
+    {{ section.settings.info_content }}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'toggle_button' -%}
+        {{ block.settings.custom_liquid }}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+  <button class="info__close-button">Close</button>
+</div>
+  {%- endcapture -%}
+
+  {%- if section.settings.image -%}
+    <div class="content-over-media content-over-media--{{ section.settings.image_size }}">
+      <picture>
+        {%- if section.settings.mobile_image != blank -%}
+          <source
+              media="(max-width: 699px)"
+              srcset="{{ section.settings.mobile_image | image_url: width: '400x' }} 400w, {{ section.settings.mobile_image | image_url: width: '600x' }} 600w, {{ section.settings.mobile_image | image_url: width: '800x' }} 800w, {{ section.settings.mobile_image | image_url: width: '1000x' }} 1000w"
+              width="{{ section.settings.mobile_image.width }}"
+              height="{{ section.settings.mobile_image.height }}"
+          >
+        {%- endif -%}
+
+        {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: widths: '400,500,600,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000' -}}
+      </picture>
+
+      {{- section_content -}}
+    </div>
+  {%- else -%}
+    <div class="container container--md">
+      {{- section_content -}}
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  .countdown__button {
+    position: relative;
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+  }
+
+  .countdown__button::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+
+  .countdown__button:hover {
+    color: #F2F2F2; /* Change this to your hover color */
+  }
+
+  .countdown__button:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .countdown__toggle-button {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  transition: color 0.3s ease;
+}
+
+.countdown__toggle-button::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.countdown__toggle-button:hover {
+  color: #F2F2F2; /* Change this to your hover color */
+}
+
+.countdown__toggle-button:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+
+.countdown {
+  background: rgba(255, 255, 255, 0);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10.2px);
+  -webkit-backdrop-filter: blur(10.2px);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+
+  .countdown__info {
+
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+     background: rgba(255, 255, 255, 0);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10.2px);
+  -webkit-backdrop-filter: blur(10.2px);
+  padding: 2rem;
+
+  }
+.countdown__buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  color: white;
+}
+.hidden {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fade-in {
+  display: block;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const countdown = document.querySelector(".countdown");
+  const info = document.querySelector(".countdown__info");
+  const toggleButtons = document.querySelectorAll(".countdown__toggle-button");
+  const closeButton = document.querySelector(".info__close-button");
+
+  function showInfo() {
+    if (!countdown.classList.contains("hidden")) {
+      countdown.classList.add("fade-out");
+      info.classList.remove("hidden");
+      info.classList.add("fade-in");
+      
+      setTimeout(() => {
+        countdown.classList.add("hidden");
+        countdown.classList.remove("fade-out");
+        info.classList.remove("fade-in");
+      }, 300); // Matches CSS transition
+    }
+  }
+
+  function hideInfo() {
+    if (!info.classList.contains("hidden")) {
+      info.classList.add("fade-out");
+      countdown.classList.remove("hidden");
+      countdown.classList.add("fade-in");
+      
+      setTimeout(() => {
+        info.classList.add("hidden");
+        info.classList.remove("fade-out");
+        countdown.classList.remove("fade-in");
+      }, 300); // Matches CSS transition
+    }
+  }
+
+  toggleButtons.forEach((button) => {
+    button.addEventListener("click", showInfo);
+  });
+
+  closeButton.addEventListener("click", hideInfo);
+});
+
+</script>

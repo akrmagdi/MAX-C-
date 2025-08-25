@@ -1,0 +1,297 @@
+<!-- parallax-hero-section.liquid -->
+<section class="parallax-hero" allow-transparent-header="">
+  <!-- Floating Menu Wrapper -->
+  <div class="floating-menu-wrapper">
+    <div class="floating-menu">
+      <!-- Main Heading -->
+      <div class="main-heading h1" style="color: {{ section.settings.heading_color }};">
+        {{ section.settings.heading }}
+      </div>
+      <!-- Menu Titles -->
+      <div class="menu-titles h3">
+        {% for block in section.blocks %}
+          <div class="menu-title {% if forloop.first %}active{% endif %}" 
+               data-index="{{ forloop.index0 }}"
+               style="color: {{ section.settings.menu_text_color }}; opacity: {% if forloop.first %}1{% else %}0.5{% endif %};">
+            {{ block.settings.title }}
+          </div>
+        {% endfor %}
+      </div>
+      <!-- Menu Button -->
+      <div class="menu-button">
+        {% for block in section.blocks %}
+          {% if forloop.first %}
+            <a href="{{ block.settings.button_url }}" 
+               class="discover-button" 
+               style="color: {{ section.settings.menu_button_color }};">
+              {{ block.settings.button_label }}
+            </a>
+          {% endif %}
+        {% endfor %}
+        <div class="separator"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parallax Images -->
+  <div class="parallax-images">
+    {% for block in section.blocks %}
+      <div class="parallax-image parallax-image-{{ forloop.index0 }}" 
+           style="background-image: url('{{ block.settings.image | img_url: '2048x2048' }}');" 
+           data-button-url="{{ block.settings.button_url }}" 
+           data-button-label="{{ block.settings.button_label }}">
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+  /* Parallax hero section container */
+  .parallax-hero {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  /* Floating menu wrapper */
+  .floating-menu-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Floating menu container */
+  .floating-menu {
+    position: sticky;
+    top: 50%;
+    padding: 2rem 0; 
+    pointer-events: auto;
+    text-align: center;
+    margin: 0 auto;
+    z-index: 1;
+
+  }
+
+  /* Main heading styling */
+  .main-heading {
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  /* Menu titles container */
+  .menu-titles {
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+
+  /* Individual menu title */
+  .menu-title {
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    display: block;
+  }
+  .menu-title.active {
+    opacity: 1;
+  }
+  .menu-title:not(.active) {
+    opacity: 0.5;
+  }
+
+  /* Menu button container */
+  .menu-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  /* Discover button */
+  .discover-button {
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .discover-button:hover {
+    opacity: 0.75;
+  }
+
+  /* Separator under button */
+  .separator {
+    width: 6.2rem;
+    height: 2px;
+    background: white;
+    margin: 0.5rem auto 0;
+  }
+
+  /* Parallax images container */
+  .parallax-images {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  /* Individual parallax image */
+  .parallax-image {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const titles = document.querySelectorAll('.menu-title');
+    const images = document.querySelectorAll('.parallax-image');
+    const discoverButton = document.querySelector('.discover-button');
+
+    // SVG defined here if needed later (not used in this snippet)
+    const svgIcon = `
+      <svg width="20px" height="20px" viewBox="0 -6.5 38 38" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+        <path d="M187.812138,38.5802109 L198.325224,49.0042713 L198.41312,49.0858421 C198.764883,49.4346574 198.96954,49.8946897 199,50.4382227 L198.998248,50.6209428 C198.97273,51.0514917 198.80819,51.4628128 198.48394,51.8313977 L198.36126,51.9580208 L187.812138,62.4197891 C187.031988,63.1934036 185.770571,63.1934036 184.990421,62.4197891 C184.205605,61.6415481 184.205605,60.3762573 184.990358,59.5980789 L192.274264,52.3739093 L162.99947,52.3746291 C161.897068,52.3746291 161,51.4850764 161,50.3835318 C161,49.2819872 161.897068,48.3924345 162.999445,48.3924345 L192.039203,48.3917152 L184.990421,41.4019837 C184.205605,40.6237427 184.205605,39.3584519 184.990421,38.5802109 C185.770571,37.8065964 187.031988,37.8065964 187.812138,38.5802109 Z"/>
+      </svg>
+    `;
+
+    // Update active title and button
+    const updateActiveState = (index) => {
+      titles.forEach((title, idx) => {
+        if (idx === index) {
+          title.classList.add('active');
+          title.style.opacity = "1";
+        } else {
+          title.classList.remove('active');
+          title.style.opacity = "0.5";
+        }
+      });
+
+      const activeImage = images[index];
+      const buttonUrl = activeImage.getAttribute('data-button-url');
+      const buttonLabel = activeImage.getAttribute('data-button-label');
+
+      if (discoverButton) {
+        discoverButton.href = buttonUrl || '#';
+        discoverButton.innerHTML = `${buttonLabel || 'Discover'}`;
+      }
+    };
+
+    // Intersection Observer to track visible images
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = [...images].indexOf(entry.target);
+            updateActiveState(index);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    // Attach observer to each image
+    images.forEach((image) => observer.observe(image));
+
+    // Click event for smooth scrolling with offset adjustment
+    titles.forEach((title, index) => {
+      title.addEventListener('click', () => {
+        // Assuming the floating menu is the parent container
+        const header = document.querySelector('.floating-menu');
+        const headerOffset = header ? header.offsetHeight : 0;
+        const extraOffset = 215;
+        const elementPosition = images[index].getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset + extraOffset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        updateActiveState(index);
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Parallax Hero Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Main Heading",
+      "default": "Explore the Collection"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Main Heading Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "menu_text_color",
+      "label": "Menu Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "menu_button_color",
+      "label": "Menu Button Color",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Parallax Image",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "title",
+          "label": "Image Title",
+          "default": "Image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_background",
+          "label": "Mobile Image"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Discover"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Parallax Hero Section",
+      "category": "Hero"
+    }
+  ]
+}
+{% endschema %}

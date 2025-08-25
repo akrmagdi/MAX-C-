@@ -1,0 +1,785 @@
+{%- comment -%}
+    
+        ██████████████████████████████████████████████████████████████
+        
+                           AKR Motion - Code Creation
+        
+           Specializing in cutting-edge web development, UX/UI, and 
+           software solutions. This code was developed by AKR Motion 
+                         in 2024 for specific project needs. 
+          
+                        Visit: https://akr-motion.com
+                     Contact: contact@akr-motion.com
+                     
+        ██████████████████████████████████████████████████████████████
+    
+{%- endcomment -%}
+{% schema %}
+{
+  "name": "slider",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Title Settings"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title Size",
+      "min": 12,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Subtitle Settings"
+    },
+    {
+      "type": "color",
+      "id": "bg2_color",
+      "label": "Card Background Color",
+      "default": "#555555"
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button Background Color",
+      "default": "#2e5b21"
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "Spacing",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Slide Image"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description 1st"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_hr1",
+          "label": "Show Divider After Description 1st",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "description1",
+          "label": "Description 2nd"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_hr2",
+          "label": "Show Divider After Description 2nd",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "description2",
+          "label": "Description 3rd"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_hr3",
+          "label": "Show Divider After Description 3rd",
+          "default": true
+        },
+        {
+          "type": "inline_richtext",
+          "id": "button_text",
+          "label": "Button Text"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "text",
+          "id": "nav_text",
+          "label": "Navigation Button Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "ISOOSI Slider",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+<style>
+   .container-main {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.slider-wrapper {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+.slider-box {
+    overflow: hidden !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    width: 50% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-radius: 16px !important;
+}
+
+@media screen and (max-width: 1024px) {
+    .slider-wrapper {
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        align-items: center !important;
+    }
+    .slider-box {
+        width: 100% !important;
+        margin: 16px 0 !important;
+    }
+    .right {
+        margin-bottom: 0px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .slider-wrapper {
+        justify-content: center !important;
+        margin: 0 auto !important;
+        padding: 16px !important;
+        gap: 20px !important;
+    }
+    .container-main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    #box1, #box2 {
+        border-radius: 16px !important;
+    }
+    .button {
+        padding: 0.5rem 1.9rem;
+        text-align: center;
+    }
+    .slider-wrapper {
+        padding: 0px {{ section.settings.spacing }}px !important;
+        max-width: 100% !important;
+        margin-top: 32px !important;
+        margin-bottom: 32px !important;
+    }
+}
+
+@media (max-width: 500px) {
+    .slider-wrapper {
+        width: 90vw !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+    }
+    .container-main {
+        padding: 0 8px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .slider-wrapper {
+        width: 96vw !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+    }
+    .container-main {
+        padding: 0 8px !important;
+    }
+    #hr-main {
+        display: none;
+    }
+}
+
+#box1 {
+    background-color: #f0f0f0 !important;
+    border-radius: 16px 16px 0 0 !important;
+}
+
+#box2 {
+    background-color: {{ section.settings.bg2_color }} !important;
+    padding: 16px !important;
+    border-radius: 0 0 16px 16px !important;
+}
+
+.slider {
+    display: flex !important;
+    transition: transform 0.5s ease-in-out !important;
+    width: 100% !important;
+    height: 100%;
+}
+
+.slide {
+    display: flex !important;
+    min-width: 100% !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+.column {
+    flex: 1 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+.column img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.content {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    padding: 16px !important;
+}
+
+@media (max-width: 600px) {
+    .slider-box {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .content {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .navigation {
+        order: -1 !important;
+    }
+    .right {
+        order: 1 !important;
+    }
+    .info {
+        order: 2 !important;
+    }
+    .right:after {
+        content: "";
+        display: block;
+        border: 1px solid #ccc;
+        margin: 16px 0;
+        width: 100%;
+    }
+    #button1 {
+        display: none !important;
+    }
+    .slider-wrapper {
+        padding: 0 !important;
+        margin: 16px !important;
+    }
+    .slider-box {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+@media (min-width: 601px) {
+    .button1 {
+        display: none !important;
+    }
+}
+
+.header {
+    text-align: left !important;
+    display: inline !important;
+    padding: 0 !important;
+}
+
+.header h2 {
+    margin: 0 !important;
+    color: {{ section.settings.title_color }} !important;
+    font-size: {{ section.settings.title_size }}px !important;
+}
+
+.header p {
+    margin: 0 !important;
+    color: {{ section.settings.subtitle_color }} !important;
+}
+
+.buy-button {
+    text-align: right !important;
+    margin-bottom: 20px !important;
+}
+
+.buy-button a {
+    background-color: {{ section.settings.button_background_color }} !important;
+    color: {{ section.settings.button_text_color }} !important;
+    text-decoration: none !important;
+    padding: 10px 20px !important;
+    cursor: pointer !important;
+    border-radius: 32px !important;
+}
+
+.info {
+    flex: 1 !important;
+}
+
+.section {
+    margin-bottom: 10px !important;
+}
+
+.section p {
+    margin: 0 !important;
+    color: {{ section.settings.description_color }} !important;
+}
+
+hr {
+    border: 0 !important;
+    border-top: 3px solid #c4c4c4 !important;
+    margin: 10px 0 !important;
+    padding: 4px 0;
+}
+
+.navigation {
+    display: flex !important;
+    gap: 10px !important;
+    justify-content: center !important;
+    padding: 10px 0 !important;
+    justify-content: space-around !important;
+}
+
+#navigation-box2 {
+    margin-top: auto !important;
+}
+
+@media (min-width: 601px) {
+    .nav-button {
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: auto !important;
+        width: 100% !important;
+        aspect-ratio: 1 !important;
+        max-width: min(max(3.75rem, 5.5555555556vw), 10rem) !important;
+        max-height: min(max(3.75rem, 5.5555555556vw), 10rem) !important;
+        border-radius: 50% !important;
+        border: 1px solid #84827e !important;
+        position: relative !important;
+        font-weight: 700 !important;
+        font-size: max(1.5rem, 1.5vw) !important;
+        transition: all 0.4s cubic-bezier(0.76, 0, 0.24, 1) !important;
+        outline: none !important;
+        opacity: 0.5 !important;
+    }
+    .nav-button h6 {
+        position: absolute !important;
+        bottom: auto !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: min(max(0.625rem, 1vw), 2.35rem) !important;
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+        text-align: center !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+    }
+
+}
+
+@media (max-width: 600px) {
+    .nav-button {
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: auto !important;
+        width: 100% !important;
+        aspect-ratio: 1 !important;
+        max-width: min(max(4.75rem, 5.5555555556vw), 10rem) !important;
+        max-height: min(max(4.75rem, 5.5555555556vw), 10rem) !important;
+        border-radius: 50% !important;
+        border: 1px solid #84827e !important;
+        position: relative !important;
+        font-weight: 700 !important;
+        font-size: max(1.5rem, 1.5vw) !important;
+        transition: all 0.4s cubic-bezier(0.76, 0, 0.24, 1) !important;
+        outline: none !important;
+        opacity: 0.5 !important;
+    }
+    .nav-button h6 {
+        position: absolute !important;
+        bottom: auto !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: min(max(0.825rem, 1vw), 2.35rem) !important;
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+        text-align: center !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+    }
+}
+
+.nav-button:hover {
+    background-color: black !important;
+}
+
+.nav-button:hover h6 {
+    color: white !important;
+}
+
+.nav-button:active {
+    background-color: black !important;
+}
+
+.nav-button:active h6 {
+    color: white !important;
+}
+
+.buy-button {
+    border-radius: 4px !important;
+    padding: 10px 16px !important;
+    font-size: 16px !important;
+    color: {{ section.settings.button_text_color }} !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+
+.nav-button.active {
+    background-color: #c9 !important;
+}
+
+a.button {
+    border-radius: 32px !important;
+    background-color: {{ section.settings.button_background_color }} !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    display: inline-block;
+    color: {{ section.settings.button_text_color }} !important;
+    text-decoration: none;
+    border: none;
+    line-height: 150%;
+    position: relative;
+    box-shadow: inset 0 0 0 1px #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+a.button:hover {
+    background: black !important;
+    opacity: 0.5;
+    color: #FFFFFF !important;
+}
+
+.button1 {
+    text-align: left !important;
+    margin-top: 8px;
+    margin: 16px 0px;
+}
+
+@media (min-width: 601px) {
+    .button1 {
+        display: none !important;
+    }
+}
+  @media screen and (max-width: 768px) {
+  a.button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.title-container h2 {
+    margin: 0;
+    flex: 1;
+}
+
+.title-container .buy-button {
+    flex-shrink: 0;
+}
+
+.title-button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls {
+    display: none !important;
+}
+
+h2 {
+    line-height: 1;
+    margin-left: -1.5px !important;
+}
+
+.subtitle-container {
+    line-height: 1;
+}
+
+.right {
+    margin-bottom: 16px;
+}
+
+h6 {
+    font-size: 16px;
+}
+  @media (min-width: 1024px) {
+  #box1,
+  #box2 {
+    border-radius: 16px !important;
+  }
+}
+
+</style>
+<div class="container-main">
+  <div class="slider-wrapper">
+    <div class="slider-box" id="box1">
+      <div class="slider" id="slider1">
+        {% for block in section.blocks %}
+          <div class="slide">
+            <div class="column">
+              {% if block.settings.image %}
+                <img alt="{{ block.settings.title }}" class="hs-lazyload hs-id-b48c7a12" loading="lazy" src="{{ block.settings.image | img_url: 'master' }}"/>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="slider-box" id="box2">
+      <div class="slider" id="slider2">
+        {% for block in section.blocks %}
+          <div class="slide">
+            <div class="content">
+              <div class="right">
+                <div class="header">
+                  <div class="title-button-container">
+                    <h2>{{ block.settings.title }}</h2>
+                    {% if block.settings.button_link contains '/products/' %}
+                      <style>
+                           .p-hide {
+                            height: 0px;
+                             width: 0px;
+                            overflow: hidden;
+                        }
+                      </style>
+                      <div class="p-hide">
+                        {%- liquid
+                          assign p_handle = block.settings.button_link | split: '/' | last
+                          # render 'product-grid-item', product: all_products[p_handle]
+                        %}
+                        {% render 'product-buttons', product: all_products[p_handle], uniq_id: block.id, block: block %}
+                      </div>
+                      <a href="javascript:void(0)" class="button button-submit" id="button1">
+                        {{- block.settings.button_text -}}
+                      </a>
+                    {% else %}
+                      <a href="{{ block.settings.button_link }}" class="button" id="button1">
+                        {{- block.settings.button_text -}}
+                      </a>
+                    {% endif -%}
+                  </div>
+                  <div class="subtitle-container">
+                    {{ block.settings.subtitle }}
+                  </div>
+                </div>
+              </div>
+              <hr id="hr-main">
+              <div class="info">
+                 <div class="section">
+                  {{ block.settings.description }}
+                  {% if block.settings.show_hr1 %}
+                    <hr>
+                  {% endif %}
+                  {{ block.settings.description1 }}
+                  {% if block.settings.show_hr2 %}
+                    <hr>
+                  {% endif %}
+                  {{ block.settings.description2 }}
+                  {% if block.settings.show_hr3 %}
+                    <hr>
+                  {% endif %}
+                  <div class="button1">
+                    <a
+                      href="{{ block.settings.button_link }}"
+                      class="button {% if block.settings.button_link contains '/products/' %}button-submit{% endif %}"
+                      id="button2"
+                    >
+                      {{- block.settings.button_text -}}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="navigation" id="navigation-box2">
+        {% for block in section.blocks %}
+          <button class="nav-button" data-index="{{ forloop.index0 }}">
+            <h6>{{ block.settings.nav_text }}</h6>
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="prevButton">Previous</button>
+    <button id="nextButton">Next</button>
+  </div>
+</div>
+<script>
+const submitSlideForm = ()=>{
+  Array.from(document.querySelectorAll('.button-submit'))
+  .forEach(item=>{
+    item.setAttribute('href','javascript:void(0)')
+    item.addEventListener('click',()=>{
+      item.closest('.slide').querySelector('[type="submit"]').click()
+    })
+  })
+}
+document.addEventListener('DOMContentLoaded', () => {
+    submitSlideForm?.()
+    let currentSlide = 0;
+    const sliders = document.querySelectorAll('.slider');
+    const navButtons = document.querySelectorAll('.nav-button');
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+
+    function showSlide(index) {
+        sliders.forEach(slider => {
+            slider.style.transform = `translateX(-${index * 100}%)`;
+        });
+
+        // Update active navigation button
+        navButtons.forEach(button => button.classList.remove('active'));
+        navButtons[index].classList.add('active');
+
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        const slides = sliders[0].querySelectorAll('.slide');
+        if (currentSlide < slides.length - 1) {
+            showSlide(currentSlide + 1);
+        } else {
+            showSlide(0);
+        }
+    }
+
+    function prevSlide() {
+        const slides = sliders[0].querySelectorAll('.slide');
+        if (currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        } else {
+            showSlide(slides.length - 1);
+        }
+    }
+
+    function attachNavButtons() {
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const index = parseInt(button.getAttribute('data-index'));
+                showSlide(index);
+            });
+
+            // Automatically click the button on hover
+            button.addEventListener('mouseover', () => {
+                const index = parseInt(button.getAttribute('data-index'));
+                showSlide(index);
+            });
+
+            // Simulate a click event when hovered
+            button.addEventListener('mouseenter', () => {
+                button.click(); // Simulate click on hover
+            });
+        });
+    }
+
+    attachNavButtons();
+
+    prevButton.addEventListener('click', prevSlide);
+    nextButton.addEventListener('click', nextSlide);
+    showSlide(currentSlide);
+
+    // Use MutationObserver to re-attach event listeners if DOM changes
+    const observer = new MutationObserver(() => {
+        attachNavButtons();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
