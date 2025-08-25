@@ -1,0 +1,211 @@
+<!doctype html>
+
+<html class="no-js" lang="{{ request.locale.iso_code }}" dir="{% render 'direction' %}">
+  <head>
+    <script src="https://js.squarecdn.com/square-marketplace.js" async></script>
+
+	<!-- Added by AVADA SEO Suite -->
+	{% include 'avada-seo' %}
+	<!-- /Added by AVADA SEO Suite -->
+
+
+<script async="async" src="https://mm-uxrv.com/js/mm_60d7e00b-6f2b-4e55-acce-56fe486032b2-76497583.js"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, maximum-scale=5.0">
+
+    <title>{% if page_title == blank %}{{ shop.name }}{% else %}{{ page_title }}{% if current_page != 1 %} &ndash; {{ 'general.page' | t: page: current_page }}{% endif %}{% endif %}</title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon -%}
+      <link rel="shortcut icon" href="{{ settings.favicon | image_url: width: 96 }}">
+      <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180 }}">
+    {%- endif -%}
+
+    {%- comment -%}Few prefetch to increase performance on commonly used third-parties{%- endcomment -%}
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+
+    {%- unless settings.heading_font.system? -%}
+      <link rel="preload" href="{{ settings.heading_font | font_url }}" as="font" type="font/woff2" crossorigin>
+    {%- endunless -%}
+
+    {%- unless settings.text_font.system? -%}
+      <link rel="preload" href="{{ settings.text_font | font_url }}" as="font" type="font/woff2" crossorigin>
+    {%- endunless -%}
+
+    {%- render 'social-meta-tags' -%}
+    {%- render 'microdata-schema' -%}
+    {%- render 'css-variables' -%}
+    {%- render 'js-variables' -%}
+    {%- render 'icon-starz' -%}
+
+    {%- if request.page_type == 'gift_card' -%}
+      <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+    {%- endif -%}
+
+    <script>
+      if (!(HTMLScriptElement.supports && HTMLScriptElement.supports('importmap'))) {
+        const importMapPolyfill = document.createElement('script');
+        importMapPolyfill.async = true;
+        importMapPolyfill.src = "{{ 'es-module-shims.min.js' | asset_url }}";
+
+        document.head.appendChild(importMapPolyfill);
+      }
+    </script>
+
+    <script type="importmap">
+      {%- comment -%}On Safari 16.3 and lower, a polyfill is used to load importmap{%- endcomment -%}
+      {
+        "imports": {
+          "vendor": "{{ 'vendor.min.js' | asset_url }}",
+          "theme": "{{ 'theme.js' | asset_url }}",
+          "photoswipe": "{{ 'photoswipe.min.js' | asset_url }}"
+        }
+      }
+    </script>
+
+    <script type="module" src="{{ 'vendor.min.js' | asset_url }}"></script>
+    <script type="module" src="{{ 'theme.js' | asset_url }}"></script>
+
+    {{ content_for_header }}
+
+    {{- 'theme.aio.min.css' | asset_url | stylesheet_tag: preload: true -}}
+
+    
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Select the collapsible panel and the sidebar image
+    const collapsiblePanel = document.querySelector(".header-sidebar__collapsible-panel");
+    const sidebarImg = document.querySelector(".sidebar-main-img");
+
+    if (collapsiblePanel && sidebarImg) {
+        // Create a MutationObserver to detect when the collapsible panel is rendered
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (getComputedStyle(collapsiblePanel).display !== "none") {
+                    // If the collapsible panel is visible, hide the sidebar image completely
+                    sidebarImg.style.display = "none";
+                } else {
+                    // If the collapsible panel is hidden, show the sidebar image again
+                    sidebarImg.style.display = "block";
+                }
+            });
+        });
+
+        // Observe changes in attributes (useful if visibility changes dynamically)
+        observer.observe(collapsiblePanel, { attributes: true, attributeFilter: ["style", "class"] });
+    }
+});
+
+</script>
+  </head>
+
+  {% liquid
+    assign features_class = ''
+
+    if settings.show_button_transition
+      assign features_class = features_class | append: 'features--button-transition '
+    endif
+
+    if settings.show_image_zoom_on_hover
+      assign features_class = features_class | append: 'features--zoom-image '
+    endif
+
+    if settings.show_page_transition
+      assign features_class = features_class | append: 'features--page-transition '
+    endif
+  %}
+
+  <body class="{{ features_class }} color-scheme color-scheme--{{ settings.default_color_scheme.id }}">
+    {%- render 'shadow-dom-templates' -%}
+
+    <loading-bar class="loading-bar" aria-hidden="true"></loading-bar>
+    <a href="#main" allow-hash-change class="skip-to-content sr-only">{{ 'general.accessibility.skip_to_content' | t }}</a>
+
+    <span id="header-scroll-tracker" style="position: absolute; width: 1px; height: 1px; top: var(--header-scroll-tracker-offset, 10px); left: 0;">
+      {%- comment -%}
+        This allows our theme to track when the user has scrolled a given amount of pixels, without relying on a global scroll listener. This helps
+        to improve performance and reduce reflows.
+      {%- endcomment -%}
+    </span>
+
+    {%- if request.page_type != 'password' -%}
+      {%- sections 'header-group' -%}
+      {%- sections 'overlay-group' -%}
+    {%- endif -%}
+
+    <main id="main" class="anchor">
+      {{ content_for_layout }}
+
+      {%- comment -%}
+      IMPLEMENTATION NOTE: For best semantics, having the footer group outside the main would be slightly better, but
+        moving it inside the main allows to have all the sections (including sections inside the footer group) to be
+        consecutive, and hence having a cleaner margin collapsing management.
+      {%- endcomment -%}
+      {%- if request.page_type != 'password' -%}
+        {%- sections 'footer-group' -%}
+      {%- endif -%}
+    </main>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  let isInches = false;
+
+  function setUnit(unit) {
+    const cmElement = document.getElementById('AKR-cm');
+    const inElement = document.getElementById('AKR-in');
+
+    if (unit === 'CM') {
+      isInches = false;
+      cmElement.classList.add('active');
+      inElement.classList.remove('active');
+    } else {
+      isInches = true;
+      inElement.classList.add('active');
+      cmElement.classList.remove('active');
+    }
+    convertUnits();
+  }
+
+  function convertUnits() {
+    const cells = document.querySelectorAll('#AKR-size-chart-table td, #AKR-size-chart-table th');
+    cells.forEach(cell => {
+      const originalCmValue = parseFloat(cell.dataset.originalCmValue);
+      if (!isNaN(originalCmValue)) {
+        let displayValue;
+        if (isInches) {
+          displayValue = roundUpToNearestQuarter(originalCmValue * 0.393701);
+        } else {
+          displayValue = originalCmValue;
+        }
+
+        cell.innerText = (displayValue % 1 === 0) ? displayValue.toFixed(0) : displayValue.toFixed(2);
+      }
+    });
+  }
+
+  function roundUpToNearestQuarter(value) {
+    return Math.ceil(value * 4) / 4;
+  }
+
+  // Initialize with stored original values in cm
+  const cells = document.querySelectorAll('#AKR-size-chart-table td, #AKR-size-chart-table th');
+  cells.forEach(cell => {
+    const value = parseFloat(cell.innerText);
+    if (!isNaN(value)) {
+      cell.dataset.originalCmValue = value; // Store the original CM value
+    }
+  });
+
+  // Attach click listeners to CM and IN elements
+  document.getElementById('AKR-cm').addEventListener('click', () => setUnit('CM'));
+  document.getElementById('AKR-in').addEventListener('click', () => setUnit('IN'));
+});
+
+    </script>
+  </body>
+</html>
