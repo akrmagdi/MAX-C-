@@ -1,0 +1,67 @@
+<div class="horizontal-product-card">
+  {%- if product.featured_media -%}
+    <a href="{{ product.url }}" class="horizontal-product-card__figure" data-instant>
+      {{- product.featured_media | image_url: width: product.featured_media.width | image_tag: loading: 'eager', sizes: '100px', widths: '100,150,200,250,300', class: 'horizontal-product-card__image' -}}
+    </a>
+  {%- endif -%}
+
+  <div class="horizontal-product-card__info">
+    <div class="v-stack gap-1 justify-items-start">
+      <a href="{{ product.url }}" class="product-title h6" data-instant>{{ product.title }}</a>
+      {%- render 'price-list', product: product, context: 'card' -%}
+    </div>
+
+    {%- if product.available and show_quick_buy -%}
+      {%- form 'product', product, is: 'product-form' -%}
+        <div class="horizontal-product-card__actions">
+          {%- if product.variants.size > 1 -%}
+            {%- comment -%} Render a dropdown for variant selection if there are multiple variants {%- endcomment -%}
+            <label for="variant-select-{{ product.id }}" class="sr-only">Choose an option</label>
+            <select id="variant-select-{{ product.id }}" name="id" class="horizontal-product-card__variant-select" required>
+              {%- for variant in product.variants -%}
+                <option value="{{ variant.id }}">{{ variant.title }}</option>
+              {%- endfor -%}
+            </select>
+          {%- else -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {%- endif -%}
+
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="on_success" value="force_open_drawer">
+
+          <button type="submit" class="horizontal-product-card__button button button--outline button--subdued">{{ 'product.general.add_to_cart_button' | t }}</button>
+        </div>
+      {%- endform -%}
+    {%- endif -%}
+  </div>
+</div>
+
+<style>
+/* Align variant select and button inline with spacing */
+.horizontal-product-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Dropdown styling for the variant picker */
+.horizontal-product-card__variant-select {
+    padding: 0.65em 1em;
+    background: transparent;
+    color: rgba(48, 48, 48, 0.65);
+    border: 0.5px solid rgba(217, 217, 218, 1);
+}
+
+/* Focus outline for the dropdown */
+.horizontal-product-card__variant-select:focus {
+  border-color: #4a90e2;
+  outline: 0.1em solid rgba(74, 144, 226, 0.4);
+}
+
+/* Reset button styles to maintain original look */
+.horizontal-product-card__button {
+  font-size: inherit; /* Maintain button font size */
+  padding: 0.5em 1em; /* Ensure consistent padding */
+}
+</style>

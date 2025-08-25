@@ -1,0 +1,26 @@
+<script>
+  // Generate a random number or timestamp to prevent caching
+  const cacheBuster = new Date().getTime();
+
+  fetch('https://raw.githubusercontent.com/akrmagdi/david-project/refs/heads/main/license.json?' + cacheBuster)
+    .then(response => response.json())
+    .then(data => {
+      const currentLicenseKey = "{{ settings.license_key }}"; // Your theme license key from settings
+
+      // Check if any license matches the currentLicenseKey and is active
+      const isValidLicense = data.licenses.some(license => 
+        license.license_key === currentLicenseKey && license.status === "active"
+      );
+
+      if (isValidLicense) {
+        console.log("License is valid. Theme works perfectly.");
+      } else {
+        console.log("License is invalid or inactive.");
+        window.location.href = "/payment-required";
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching license information:", error);
+      window.location.href = "/payment-error";
+    });
+</script>

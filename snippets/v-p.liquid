@@ -1,0 +1,60 @@
+{% comment %}
+Variant Picker Snippet with Default Settings
+-------------------------------------------
+This snippet applies default settings for the variant picker and allows customization via arguments.
+
+Arguments:
+* product (required) - the product to render the picker for
+* update_url - whether to update the URL when the variant changes (default: false)
+* hide_sold_out_variants - whether to hide sold-out variants (default: false)
+* form_id - ID of the form listening for variant changes (default: 'product-form')
+* selector_style - selector style for main variant selectors (default: 'dropdown')
+* swatch_selector_style - selector style for dedicated swatch selectors (default: 'swatch')
+* variant_image_options - comma-separated string of options to use for the variant image selector mode (default: none)
+* size_chart_page - the page for the size chart (optional)
+{% endcomment %}
+
+{% assign update_url = update_url | default: false %}
+{% assign hide_sold_out_variants = hide_sold_out_variants | default: false %}
+{% assign form_id = form_id | default: 'product-form' %}
+{% assign selector_style = selector_style | default: 'dropdown' %}
+{% assign swatch_selector_style = swatch_selector_style | default: 'swatch' %}
+{% assign variant_image_options = variant_image_options | default: '' | split: ',' %}
+
+{% if product.has_only_default_variant == false or hide_sold_out_variants == false or product.available %}
+  <variant-picker class="variant-picker v-stack gap-4" handle="{{ product.handle }}" form="{{ form_id }}" {% if update_url %}update-url{% endif %} {% if hide_sold_out_variants %}hide-sold-out-variants{% endif %}>
+    
+    {% for option in product.options_with_values %}
+      {% assign option_downcase = option.name | downcase %}
+      {% assign resolved_option_selector_style = selector_style %}
+
+      {% if variant_image_options contains option_downcase %}
+        {% assign resolved_option_selector_style = 'variant_image' %}
+      {% endif %}
+      
+      {% assign name = 'option' | append: option.position %}
+      
+      <fieldset class="variant-picker__option v-stack gap-2 no-js:hidden">
+        <div class="variant-picker__option-info h-stack justify-between gap-2">
+          <legend>{{ option.name }}:</legend>
+
+          {% if resolved_option_selector_style == 'dropdown' %}
+            <select id="{{ name }}" name="option{{ option.position }}" form="{{ form_id }}">
+              {% for value in option.values %}
+                <option value="{{ value }}" {% if value == option.selected_value %}selected{% endif %}>{{ value }}</option>
+              {% endfor %}
+            </select>
+          {% elsif resolved_option_selector_style == 'swatch' %}
+            <div class="swatch-options">
+              {% for value in option.values %}
+                <input type="radio" id="{{ name }}_{{ value }}" name="option{{ option.position }}" value="{{ value }}" {% if value == option.selected_value %}checked{% endif %}>
+                <label for="{{ name }}_{{ value }}">{{ value }}</label>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </fieldset>
+    {% endfor %}
+    
+  </variant-picker>
+{% endif %}

@@ -1,0 +1,329 @@
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+{%- liquid
+  if hide_product_information
+    assign show_badges = false
+    assign show_rating = false
+    assign show_vendor = false
+    assign show_title = false
+    assign show_prices = false
+    assign show_swatches = false
+    assign show_quick_buy = show_quick_buy | default: settings.show_quick_buy, allow_false: true
+    assign show_secondary_image = show_secondary_image | default: settings.show_secondary_image, allow_false: true
+  else
+    assign show_badges = show_badges | default: true, allow_false: true
+    assign show_rating = show_rating | default: settings.show_product_rating, allow_false: true
+    assign show_vendor = show_vendor | default: settings.show_vendor, allow_false: true
+    assign show_quick_buy = show_quick_buy | default: settings.show_quick_buy, allow_false: true
+    assign show_title = true
+    assign show_prices = true
+    assign show_secondary_image = show_secondary_image | default: settings.show_secondary_image, allow_false: true
+    assign show_swatches = show_swatches | default: true, allow_false: true
+  endif
+-%}
+
+<product-card class="product-card" {% if reveal %}reveal-on-scroll="true"{% endif %} handle="{{ product.handle | escape }}">
+  <!-- Product Image Section -->
+  <div class="product-card__figure" style="position: relative;">
+    {%- if show_badges -%}
+      {%- render 'product-badges', product: product, vertical: true -%}
+    {%- endif -%}
+
+    <a href="{{ product.url }}" class="product-card__media">
+      <div class="swiper-container" id="swiper-{{ product.id }}">
+        <div class="swiper-wrapper">
+          {%- liquid
+            assign first_media = product.featured_media
+            if first_media == nil and product.media.size > 0
+              assign first_media = product.media.first
+            endif
+          -%}
+
+          <!-- Primary Image (safe fallback) -->
+          <div class="swiper-slide">
+            {%- if first_media -%}
+              {{- first_media
+                | image_url: width: 1500
+                | image_tag: class: 'product-card__image', loading: 'lazy'
+              -}}
+            {%- endif -%}
+          </div>
+
+          <!-- Secondary Image (if available and different) -->
+          {%- if show_secondary_image and product.media.size > 1 -%}
+            {%- assign second_media = nil -%}
+            {%- for m in product.media -%}
+              {%- if first_media and m.id != first_media.id -%}
+                {%- assign second_media = m -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if second_media -%}
+              <div class="swiper-slide">
+                {{- second_media
+                  | image_url: width: 1500
+                  | image_tag: class: 'product-card__image', loading: 'lazy'
+                -}}
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+
+        <!-- Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <!-- Pagination (hidden by CSS below) -->
+        <div class="swiper-pagination"></div>
+      </div>
+    </a>
+
+    <!-- Quick Add + Variant Picker -->
+    {%- if show_quick_buy and product.available -%}
+      {%- form 'product', product, is: 'product-form' -%}
+        <input type="hidden" name="on_success" value="force_open_drawer">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="id" id="variant-id-{{ product.id }}" value="{{ product.selected_or_first_available_variant.id }}">
+
+        <div class="quick-add-container has-variants" style="position: relative;">
+          <button type="submit" class="product-card__quick-add-button" id="quick-add-{{ product.id }}">
+            <span class="sr-only">{{ 'product.general.add_to_cart_button' | t }}</span>
+            {%- render 'icon' with 'plus' -%}
+          </button>
+
+          {%- if product.variants.size > 1 -%}
+            <!-- RADIO + LABEL variant grid (your existing CSS for .block-swatch handles disabled/sold-out look) -->
+            <div class="variant-picker-grid" aria-label="Select a variant">
+              {%- assign group_name = 'quick-variant-' | append: product.id -%}
+              {%- for variant in product.variants -%}
+                {%- assign input_id = 'v-' | append: product.id | append: '-' | append: variant.id -%}
+
+                <input
+                  type="radio"
+                  id="{{ input_id }}"
+                  class="variant-option-input"
+                  name="{{ group_name }}"
+                  value="{{ variant.id }}"
+                  {% unless variant.available %}disabled{% endunless %}
+                  {% if variant == product.selected_or_first_available_variant %}checked{% endif %}
+                  data-variant-id="{{ variant.id }}"
+                >
+
+                <label
+                  class="block-swatch variant-option h6{% unless variant.available %} is-sold-out{% endunless %}"
+                  for="{{ input_id }}"
+                  title="{{ variant.title | escape }}"
+                >
+                  <span>{{ variant.title }}</span>
+                </label>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endform -%}
+    {%- endif -%}
+  </div>
+
+  <!-- Product Information Section -->
+  <div class="product-card__info empty:hidden">
+    {%- assign text_class = '' -%}
+    {%- if settings.product_card_text_font == 'heading' -%}
+      {%- assign text_class = 'h6' -%}
+    {%- endif -%}
+
+    <div class="v-stack justify-items-center gap-2">
+      {%- if show_vendor and product.vendor != blank -%}
+        <div class="product-vendor smallcaps">{{ product.vendor }}</div>
+      {%- endif -%}
+
+      {%- if show_title -%}
+        <a href="{{ product.url }}" class="product-title {{ text_class }}" data-instant>{{ product.title }}</a>
+      {%- endif -%}
+
+      {%- if show_prices -%}
+        {%- render 'price-list', product: product, context: 'card' -%}
+      {%- endif -%}
+
+      {%- if show_description and product.description != blank -%}
+        <p class="product-description">{{ product.description | strip_html | truncate: 100 }}</p>
+      {%- endif -%}
+
+      {%- if show_swatches -%}
+        <div class="product-swatches">
+          {%- assign color_label_list = 'general.label.color' | t | replace: ', ', ',' | downcase | split: ',' -%}
+          {%- for color_label in color_label_list -%}
+            {%- if product.options_by_name[color_label] != blank -%}
+              {%- assign product_option = product.options_by_name[color_label] -%}
+              <fieldset class="h-stack wrap justify-center gap-1" data-option-position="{{ product_option.position }}">
+                {%- for option_value in product_option.values -%}
+                  <span class="swatch">{{ option_value }}</span>
+                {%- endfor -%}
+              </fieldset>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if show_rating -%}
+        {%- render 'product-rating', product: product, show_empty: settings.show_product_rating_if_empty, display_mode: settings.product_rating_mode -%}
+      {%- endif -%}
+    </div>
+  </div>
+</product-card>
+
+<style>
+  /* Smaller Swiper arrows + general tweaks */
+  .swiper-container { width:100%; height:auto; overflow:hidden; --swiper-navigation-size: 18px; }
+  .swiper-slide { width:100%; height:auto; object-fit:cover; }
+  .product-card__image { width:100%; height:auto; }
+
+  .swiper-button-next,
+  .swiper-button-prev {
+    color:black;
+    opacity:0.7;
+    transition:opacity .2s;
+    display:none; /* reveal on hover below */
+  }
+  .product-card__figure:hover .swiper-button-next,
+  .product-card__figure:hover .swiper-button-prev { display:block; }
+  .swiper-button-next:hover,
+  .swiper-button-prev:hover { opacity:1; }
+
+  /* Hide pagination on cards (optional) */
+  .swiper-pagination { display:none; }
+
+  /* Variant grid visibility (animation only; your .block-swatch handles visuals) */
+  .quick-add-container:hover .variant-picker-grid {
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+  }
+  .quick-add-container.has-variants:hover .product-card__quick-add-button {
+    opacity:0; transition:opacity .2s ease;
+  }
+  .variant-picker-grid {
+    position:absolute;
+    bottom:.625em;
+    left:50%;
+    transform:translateX(-50%) translateY(1.25em);
+    width:100%;
+    z-index:2;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s ease, transform .12s ease;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:.5rem;
+  }
+
+  /* Inputs are visually hidden; labels are styled by your .block-swatch CSS */
+  .variant-option-input {
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const containers = document.querySelectorAll('.swiper-container');
+    const swipers = Array.from(containers).map(container =>
+      new Swiper(container, {
+        loop: false,
+        navigation: {
+          nextEl: container.querySelector('.swiper-button-next'),
+          prevEl: container.querySelector('.swiper-button-prev'),
+        },
+        pagination: { el: container.querySelector('.swiper-pagination') }
+      })
+    );
+
+    // Ultra-subtle 8–12px nudge using Web Animations API (smooth, no jank)
+    function playSubtleHint(swiper, totalMs = 3000, amplitudePx = 10) {
+      try {
+        swiper.update();
+        const wrapper = swiper.wrapperEl;
+        if (!wrapper) return;
+
+        const rtl = swiper.rtlTranslate === true || document.dir === 'rtl';
+        const dir = rtl ? 1 : -1; // left in LTR, right in RTL
+
+        // If WAAPI supported, animate smoothly and cleanly
+        if (wrapper.animate) {
+          const anim = wrapper.animate(
+            [
+              { transform: 'translate3d(0,0,0)', offset: 0 },
+              { transform: `translate3d(${dir * amplitudePx}px,0,0)`, offset: 0.15 },
+              { transform: 'translate3d(0,0,0)', offset: 0.3 },
+              { transform: `translate3d(${dir * (amplitudePx * 0.7)}px,0,0)`, offset: 0.5 },
+              { transform: 'translate3d(0,0,0)', offset: 0.7 },
+              { transform: `translate3d(${dir * (amplitudePx * 0.5)}px,0,0)`, offset: 0.85 },
+              { transform: 'translate3d(0,0,0)', offset: 1 }
+            ],
+            {
+              duration: totalMs,
+              easing: 'ease-in-out',
+              iterations: 1,
+              fill: 'both'
+            }
+          );
+          anim.addEventListener?.('finish', () => {
+            wrapper.style.transform = '';
+            swiper.update();
+          });
+          return;
+        }
+
+        // Fallback (no WAAPI): tiny two-step nudge loop, still subtle
+        let elapsed = 0;
+        const step = 300;
+        const run = () => {
+          if (elapsed >= totalMs) {
+            wrapper.style.transform = 'translate3d(0,0,0)';
+            swiper.update();
+            return;
+          }
+          wrapper.style.transition = `transform ${step}ms ease-in-out`;
+          wrapper.style.transform = `translate3d(${dir * amplitudePx}px,0,0)`;
+          setTimeout(() => {
+            wrapper.style.transform = 'translate3d(0,0,0)';
+            setTimeout(() => {
+              elapsed += step * 2;
+              run();
+            }, step);
+          }, step);
+        };
+        run();
+      } catch (_) {}
+    }
+
+    // Trigger once when first multi-image swiper enters view
+    const firstMultiIndex = swipers.findIndex(sw => (sw.slides?.length || 0) > 1);
+    if (firstMultiIndex !== -1) {
+      const targetSwiper = swipers[firstMultiIndex];
+      const targetEl = containers[firstMultiIndex];
+      const io = new IntersectionObserver((entries) => {
+        const e = entries[0];
+        if (!e.isIntersecting) return;
+        // small delay to ensure layout is final
+        setTimeout(() => playSubtleHint(targetSwiper, 3000, 10), 150);
+        io.disconnect();
+      }, { threshold: 0.4 });
+      io.observe(targetEl);
+    }
+
+    // Variant radio → set hidden id and submit
+    document.addEventListener('change', (e) => {
+      const input = e.target;
+      if (!input.classList.contains('variant-option-input') || input.disabled) return;
+      const form = input.closest('form');
+      const hiddenIdInput = form?.querySelector('input[name="id"]');
+      const quickBtn = form?.querySelector('.product-card__quick-add-button');
+      if (hiddenIdInput && quickBtn) {
+        hiddenIdInput.value = input.value;
+        setTimeout(() => quickBtn.click(), 0);
+      }
+    });
+  });
+</script>
